@@ -1,5 +1,5 @@
 module.exports = {
-    HOST: 'localhost',
+    HOST: '165.22.123.116',
     USER: 'root',
     PASSWORD: '',
     DB: 'domicilio_api_db',
