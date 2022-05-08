@@ -20,6 +20,15 @@ const forwardConfig = {
     dstHost: dbServer.host,
     dstPort: dbServer.port
 };
+
+
+const pool =  {
+    max: 5,
+    min: 0,
+    acquire: 30000,
+    idle: 10000
+}
+
 const SSHConnection = new Promise((resolve, reject) => {
     ssh.on('ready', () => {
         ssh.forwardOut(
@@ -27,6 +36,11 @@ const SSHConnection = new Promise((resolve, reject) => {
         forwardConfig.srcPort,
         forwardConfig.dstHost,
         forwardConfig.dstPort,
+        pool.max,
+        pool.min,
+        pool.acquire,
+        pool.idle,
+        
         (err, stream) => {
              if (err) reject(err);
              const updatedDbServer = {
