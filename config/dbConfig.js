@@ -36,10 +36,6 @@ const SSHConnection = new Promise((resolve, reject) => {
         forwardConfig.srcPort,
         forwardConfig.dstHost,
         forwardConfig.dstPort,
-        pool.max,
-        pool.min,
-        pool.acquire,
-        pool.idle,
         
         (err, stream) => {
              if (err) reject(err);
