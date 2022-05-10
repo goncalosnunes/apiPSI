@@ -1,74 +1,45 @@
-const mysql = require('mysql2');
-const { Client } = require('ssh2');
-const sshClient = new Client();
-const dbServer = {
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    user: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_DATABASE,
-    dialect: 'mysql'
-}
-const tunnelConfig = {
-    host: process.env.DB_SSH_HOST,
-    port: 22,
-    username: process.env.DB_SSH_USER,
-    password: process.env.DB_SSH_PASSWORD
-}
-const forwardConfig = {
-    srcHost: '127.0.0.1',
-    srcPort: 3306,
-    dstHost: dbServer.host,
-    dstPort: dbServer.port
-};
+// sequelize config  
 
-
-const pool =  {
-    max: 5,
-    min: 0,
-    acquire: 30000,
-    idle: 10000
-}
-
-const SSHConnection = new Promise((resolve, reject) => {
-    ssh.on('ready', () => {
-        ssh.forwardOut(
-        forwardConfig.srcHost,
-        forwardConfig.srcPort,
-        forwardConfig.dstHost,
-        forwardConfig.dstPort,
-        
-        (err, stream) => {
-             if (err) reject(err);
-             const updatedDbServer = {
-                 ...dbServer,
-                 stream
-            };
-            const connection =  mysql.createConnection(updatedDbServer);
-           connection.connect((error) => {
-            if (error) {
-                reject(error);
-            }
-            resolve(connection);
-            });
-        });
-    }).connect(tunnelConfig.sshConfig);
-});
-
-module.exports = SSHConnection;
-
-/* {
+var sequelize = new sequelize('database', 'user', 'pass', {   
+    host: '127.0.0.1',   
+    dialect: 'mysql',   
+    port: 3306,    
+    pool: {     
+      max: 10,     
+      min: 0,     
+      idle: 20000   
+    } 
+  });
+  
+  // tunnel config 
     
-    HOST: '165.22.123.116',
-    USER: 'root',
-    PASSWORD: '',
-    DB: 'domicilio_api_db',
-    dialect: 'mysql',
-
-    pool: {
-        max: 5,
-        min: 0,
-        acquire: 30000,
-        idle: 10000
-    }
-} */
+  var config = {       
+    username:'user',
+    host:'sshhost',
+    port:22,
+    dstHost:'127.0.0.1',
+    dstPort:3306,
+    srcHost:'127.0.0.1',
+    srcPort:3306,
+    localHost:'127.0.0.1',
+    localPort: 3306,
+    privatekey: require('fs').readfilesync('/Files/key')   
+  };  
+    
+  var tunnel = require('tunnel-ssh');  
+  // initiate tunnel 
+  
+  tunnel(config, function (error, server) {   
+    //....   
+    if(error) {     
+      console.error(error);   
+    } else {     
+      console.log('server:', server);    
+      // test sequelize connection     
+      sequelize.authenticate().then(function(err) {
+        console.log('connection established');         
+      }).catch(function(err) {             
+        console.error('unable establish connection', err);         
+      })   
+    } 
+  }) 
